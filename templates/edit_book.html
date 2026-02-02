@@ -1,0 +1,124 @@
+{% extends "layout.html" %}
+
+{% block title %}Modifier - {{ book[1] }}{% endblock %}
+
+{% block content %}
+<div class="mb-4">
+    <a href="/books" class="btn btn-secondary btn-custom">
+        <i class="fas fa-arrow-left"></i> Retour aux livres
+    </a>
+</div>
+
+<div class="card">
+    <div class="card-header bg-warning text-dark">
+        <h4 class="mb-0"><i class="fas fa-edit"></i> Modifier le livre</h4>
+    </div>
+    <div class="card-body">
+        <form method="POST" action="/update_book/{{ book[0] }}" enctype="multipart/form-data">
+            <div class="row">
+                <!-- Titre -->
+                <div class="col-md-8 mb-3">
+                    <label class="form-label fw-bold">Titre *</label>
+                    <input type="text" name="title" class="form-control" value="{{ book[1] }}" required>
+                </div>
+                
+                <!-- Année -->
+                <div class="col-md-4 mb-3">
+                    <label class="form-label fw-bold">Année de publication</label>
+                    <input type="number" name="year" class="form-control" 
+                           value="{{ book[4] if book[4] else '' }}" 
+                           min="1000" max="2100">
+                </div>
+                
+                <!-- Auteur -->
+                <div class="col-md-6 mb-3">
+                    <label class="form-label fw-bold">Auteur *</label>
+                    <select name="author_id" class="form-select" required>
+                        {% for a in authors %}
+                        <option value="{{ a[0] }}" {% if book[2] == a[0] %}selected{% endif %}>
+                            {{ a[1] }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                
+                <!-- Catégorie -->
+                <div class="col-md-6 mb-3">
+                    <label class="form-label fw-bold">Catégorie *</label>
+                    <select name="category_id" class="form-select" required>
+                        {% for c in categories %}
+                        <option value="{{ c[0] }}" {% if book[3] == c[0] %}selected{% endif %}>
+                            {{ c[1] }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                
+                <!-- Description -->
+                <div class="col-12 mb-3">
+                    <label class="form-label fw-bold">Description</label>
+                    <textarea name="description" class="form-control" rows="4">{{ book[5] if book[5] else '' }}</textarea>
+                </div>
+                
+                <!-- Fichiers actuels -->
+                <div class="col-12 mb-4">
+                    <div class="alert alert-info">
+                        <h6><i class="fas fa-info-circle"></i> Fichiers actuels:</h6>
+                        <div class="row mt-3">
+                            <div class="col-md-6">
+                                <strong>PDF actuel:</strong>
+                                {% if book[6] %}
+                                    <span class="badge bg-success">{{ book[6] }}</span>
+                                    <a href="{{ url_for('static', filename='uploads/books/' + book[6]) }}" 
+                                       target="_blank" class="btn btn-sm btn-outline-success ms-2">
+                                        <i class="fas fa-eye"></i> Voir
+                                    </a>
+                                {% else %}
+                                    <span class="badge bg-secondary">Aucun PDF</span>
+                                {% endif %}
+                            </div>
+                            <div class="col-md-6">
+                                <strong>Couverture actuelle:</strong>
+                                {% if book[7] %}
+                                    <img src="{{ url_for('static', filename='uploads/covers/' + book[7]) }}" 
+                                         height="60" class="ms-2 rounded">
+                                {% else %}
+                                    <span class="badge bg-secondary">Aucune image</span>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Nouveau PDF -->
+                <div class="col-md-6 mb-3">
+                    <label class="form-label fw-bold">
+                        <i class="fas fa-file-pdf text-danger"></i> Remplacer le PDF (optionnel)
+                    </label>
+                    <input type="file" name="pdf_file" class="form-control" accept=".pdf">
+                    <small class="text-muted">Laissez vide pour conserver le PDF actuel. Max 16MB</small>
+                </div>
+                
+                <!-- Nouvelle couverture -->
+                <div class="col-md-6 mb-3">
+                    <label class="form-label fw-bold">
+                        <i class="fas fa-image text-primary"></i> Remplacer la couverture (optionnel)
+                    </label>
+                    <input type="file" name="cover_image" class="form-control" accept="image/*">
+                    <small class="text-muted">Laissez vide pour conserver l'image actuelle</small>
+                </div>
+            </div>
+            
+            <!-- Boutons -->
+            <div class="d-flex justify-content-end gap-2 mt-4">
+                <a href="/books" class="btn btn-secondary btn-custom">
+                    <i class="fas fa-times"></i> Annuler
+                </a>
+                <button type="submit" class="btn btn-warning btn-custom">
+                    <i class="fas fa-save"></i> Mettre à jour
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

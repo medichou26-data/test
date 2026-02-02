@@ -1,0 +1,89 @@
+{% extends "layout.html" %}
+
+{% block title %}Gestion des Catégories{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2><i class="fas fa-tags"></i> Gestion des Catégories</h2>
+    <button class="btn btn-warning btn-custom" data-bs-toggle="modal" data-bs-target="#addCategoryModal">
+        <i class="fas fa-plus"></i> Ajouter une catégorie
+    </button>
+</div>
+
+<!-- Grille des catégories -->
+<div class="row">
+    {% for c in categories %}
+    <div class="col-md-6 col-lg-4 mb-4">
+        <div class="card h-100 border-start border-warning border-4">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-start mb-3">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-tag text-warning"></i> {{ c[1] }}
+                    </h5>
+                    <span class="badge bg-warning text-dark">
+                        {{ c[3] }} livre{{ 's' if c[3] > 1 else '' }}
+                    </span>
+                </div>
+                
+                {% if c[2] %}
+                <p class="card-text text-muted small">{{ c[2][:150] }}{% if c[2]|length > 150 %}...{% endif %}</p>
+                {% else %}
+                <p class="card-text text-muted small fst-italic">Aucune description</p>
+                {% endif %}
+                
+                <div class="mt-3">
+                    <a href="/delete_category/{{ c[0] }}" 
+                       class="btn btn-danger btn-sm btn-custom"
+                       onclick="return confirm('Êtes-vous sûr de vouloir supprimer cette catégorie ?')">
+                        <i class="fas fa-trash"></i> Supprimer
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+    
+    {% if categories|length == 0 %}
+    <div class="col-12 text-center py-5">
+        <i class="fas fa-tags fa-5x text-muted mb-3"></i>
+        <h4>Aucune catégorie enregistrée</h4>
+        <p class="text-muted">Commencez par ajouter votre première catégorie</p>
+    </div>
+    {% endif %}
+</div>
+
+<!-- Modal Ajouter Catégorie -->
+<div class="modal fade" id="addCategoryModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-warning text-dark">
+                <h5 class="modal-title">
+                    <i class="fas fa-plus-circle"></i> Ajouter une nouvelle catégorie
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form method="POST" action="/add_category">
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Nom de la catégorie *</label>
+                        <input type="text" name="name" class="form-control" 
+                               placeholder="Ex: Roman, Science-Fiction, Philosophie..." required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Description</label>
+                        <textarea name="description" class="form-control" rows="3" 
+                                  placeholder="Description de cette catégorie..."></textarea>
+                        <small class="text-muted">Optionnel</small>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                    <button type="submit" class="btn btn-warning btn-custom">
+                        <i class="fas fa-save"></i> Enregistrer
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

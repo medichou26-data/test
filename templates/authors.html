@@ -1,0 +1,89 @@
+{% extends "layout.html" %}
+
+{% block title %}Gestion des Auteurs{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2><i class="fas fa-user-edit"></i> Gestion des Auteurs</h2>
+    <button class="btn btn-success btn-custom" data-bs-toggle="modal" data-bs-target="#addAuthorModal">
+        <i class="fas fa-plus"></i> Ajouter un auteur
+    </button>
+</div>
+
+<!-- Grille des auteurs -->
+<div class="row">
+    {% for a in authors %}
+    <div class="col-md-6 col-lg-4 mb-4">
+        <div class="card h-100">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-start mb-3">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-user-circle text-primary"></i> {{ a[1] }}
+                    </h5>
+                    <span class="badge bg-info">
+                        {{ a[3] }} livre{{ 's' if a[3] > 1 else '' }}
+                    </span>
+                </div>
+                
+                {% if a[2] %}
+                <p class="card-text text-muted small">{{ a[2][:150] }}{% if a[2]|length > 150 %}...{% endif %}</p>
+                {% else %}
+                <p class="card-text text-muted small fst-italic">Aucune biographie</p>
+                {% endif %}
+                
+                <div class="mt-3">
+                    <a href="/delete_author/{{ a[0] }}" 
+                       class="btn btn-danger btn-sm btn-custom"
+                       onclick="return confirm('Êtes-vous sûr de vouloir supprimer cet auteur ?')">
+                        <i class="fas fa-trash"></i> Supprimer
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+    
+    {% if authors|length == 0 %}
+    <div class="col-12 text-center py-5">
+        <i class="fas fa-user-slash fa-5x text-muted mb-3"></i>
+        <h4>Aucun auteur enregistré</h4>
+        <p class="text-muted">Commencez par ajouter votre premier auteur</p>
+    </div>
+    {% endif %}
+</div>
+
+<!-- Modal Ajouter Auteur -->
+<div class="modal fade" id="addAuthorModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-success text-white">
+                <h5 class="modal-title">
+                    <i class="fas fa-user-plus"></i> Ajouter un nouvel auteur
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <form method="POST" action="/add_author">
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Nom de l'auteur *</label>
+                        <input type="text" name="name" class="form-control" 
+                               placeholder="Ex: Victor Hugo" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Biographie</label>
+                        <textarea name="bio" class="form-control" rows="4" 
+                                  placeholder="Courte biographie de l'auteur..."></textarea>
+                        <small class="text-muted">Optionnel</small>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                    <button type="submit" class="btn btn-success btn-custom">
+                        <i class="fas fa-save"></i> Enregistrer
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

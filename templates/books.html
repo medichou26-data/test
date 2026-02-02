@@ -1,0 +1,180 @@
+{% extends "layout.html" %}
+
+{% block title %}Gestion des Livres{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2><i class="fas fa-book"></i> Gestion des Livres</h2>
+    <button class="btn btn-primary btn-custom" data-bs-toggle="modal" data-bs-target="#addBookModal">
+        <i class="fas fa-plus"></i> Ajouter un livre
+    </button>
+</div>
+
+<!-- Barre de recherche et filtres -->
+<div class="row mb-4">
+    <div class="col-md-8">
+        <form method="GET" action="/books" class="d-flex">
+            <input type="text" name="search" class="form-control me-2" 
+                   placeholder="Rechercher par titre ou auteur..." 
+                   value="{{ search }}">
+            <button type="submit" class="btn btn-primary btn-custom">
+                <i class="fas fa-search"></i> Rechercher
+            </button>
+        </form>
+    </div>
+    <div class="col-md-4">
+        <form method="GET" action="/books">
+            <select name="category" class="form-select" onchange="this.form.submit()">
+                <option value="">Toutes les catégories</option>
+                {% for c in categories %}
+                <option value="{{ c[0] }}" {% if category_filter == c[0]|string %}selected{% endif %}>
+                    {{ c[1] }}
+                </option>
+                {% endfor %}
+            </select>
+        </form>
+    </div>
+</div>
+
+<!-- Affichage en grille -->
+<div class="row">
+    {% for b in books %}
+    <div class="col-md-4 col-lg-3 mb-4">
+        <div class="card h-100">
+            <!-- Image cliquable vers détails -->
+            <a href="/book/{{ b[0] }}">
+                <img src="{{ url_for('static', filename='uploads/covers/' + b[6]) }}" 
+                     class="book-cover" 
+                     alt="{{ b[1] }}"
+                     onerror="this.src='{{ url_for('static', filename='uploads/covers/default-cover.jpg') }}'">
+            </a>
+            <div class="card-body d-flex flex-column">
+                <h6 class="card-title fw-bold">{{ b[1] }}</h6>
+                <p class="card-text text-muted small mb-1">
+                    <i class="fas fa-user"></i> {{ b[2] }}
+                </p>
+                <p class="card-text text-muted small mb-2">
+                    <i class="fas fa-tag"></i> {{ b[3] }}
+                </p>
+                {% if b[4] %}
+                <p class="card-text small">
+                    <i class="fas fa-calendar"></i> {{ b[4] }}
+                </p>
+                {% endif %}
+                
+                <div class="mt-auto">
+                    <!-- Bouton Lire PDF -->
+                    {% if b[5] %}
+                    <a href="{{ url_for('static', filename='uploads/books/' + b[5]) }}" 
+                       target="_blank" 
+                       class="btn btn-success btn-sm btn-custom w-100 mb-2">
+                        <i class="fas fa-file-pdf"></i> Lire PDF
+                    </a>
+                    {% else %}
+                    <button class="btn btn-secondary btn-sm w-100 mb-2" disabled>
+                        <i class="fas fa-file-pdf"></i> Pas de PDF
+                    </button>
+                    {% endif %}
+                    
+                    <!-- Boutons d'action -->
+                    <div class="btn-group w-100">
+                        <a href="/book/{{ b[0] }}" class="btn btn-info btn-sm">
+                            <i class="fas fa-eye"></i>
+                        </a>
+                        <a href="/edit_book/{{ b[0] }}" class="btn btn-warning btn-sm">
+                            <i class="fas fa-edit"></i>
+                        </a>
+                        <a href="/delete_book/{{ b[0] }}" 
+                           class="btn btn-danger btn-sm" 
+                           onclick="return confirm('Êtes-vous sûr de vouloir supprimer ce livre ?')">
+                            <i class="fas fa-trash"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+    
+    {% if books|length == 0 %}
+    <div class="col-12 text-center py-5">
+        <i class="fas fa-search fa-5x text-muted mb-3"></i>
+        <h4>Aucun livre trouvé</h4>
+        {% if search or category_filter %}
+        <p class="text-muted">Essayez de modifier vos critères de recherche</p>
+        <a href="/books" class="btn btn-primary btn-custom">Réinitialiser les filtres</a>
+        {% else %}
+        <p class="text-muted">Commencez par ajouter votre premier livre</p>
+        {% endif %}
+    </div>
+    {% endif %}
+</div>
+
+<!-- Modal Ajouter Livre -->
+<div class="modal fade" id="addBookModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title"><i class="fas fa-plus"></i> Ajouter un nouveau livre</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form method="POST" action="/add_book" enctype="multipart/form-data">
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Titre *</label>
+                            <input type="text" name="title" class="form-control" required>
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <label class="form-label">Année</label>
+                            <input type="number" name="year" class="form-control" min="1000" max="2100">
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <label class="form-label">Auteur *</label>
+                            <select name="author_id" class="form-select" required>
+                                <option value="">Choisir...</option>
+                                {% for a in authors %}
+                                <option value="{{ a[0] }}">{{ a[1] }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Catégorie *</label>
+                            <select name="category_id" class="form-select" required>
+                                <option value="">Choisir...</option>
+                                {% for c in categories %}
+                                <option value="{{ c[0] }}">{{ c[1] }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-12 mb-3">
+                            <label class="form-label">Description</label>
+                            <textarea name="description" class="form-control" rows="3"></textarea>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">
+                                <i class="fas fa-file-pdf text-danger"></i> Fichier PDF
+                            </label>
+                            <input type="file" name="pdf_file" class="form-control" accept=".pdf">
+                            <small class="text-muted">Max 16MB</small>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">
+                                <i class="fas fa-image text-primary"></i> Image de couverture
+                            </label>
+                            <input type="file" name="cover_image" class="form-control" accept="image/*">
+                            <small class="text-muted">JPG, PNG, GIF</small>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                    <button type="submit" class="btn btn-primary btn-custom">
+                        <i class="fas fa-save"></i> Enregistrer
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
